@@ -2,15 +2,11 @@
 
 Manajemen Gudang dengan menggunakan Golang + React
 
-## Daftar Isi
-- [Teknologi yang Digunakan](#teknologi-yang-digunakan)
-- [Prasyarat](#prasyarat)
-- [Setup Database](#setup-database)
-- [Setup Backend](#setup-backend)
-- [Setup Frontend](#setup-frontend)
-- [Menjalankan Aplikasi](#menjalankan-aplikasi)
-- [Struktur Project](#struktur-project)
-
+## Fitur Utama
+- **Master Data**: Manajemen Supplier, Customer, Product, dan Warehouse.
+- **Transaksi Masuk (Trx In)**: Menambah stok gudang.
+- **Transaksi Keluar (Trx Out)**: Mengurangi stok dengan **Validasi Stok Otomatis** (Mencegah input jika stok kurang).
+- **Laporan Stok**: Melihat posisi stok terkini (Hanya menampilkan barang yang memiliki stok).
 
 ## Teknologi yang Digunakan
 ### Backend
