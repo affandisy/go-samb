@@ -114,7 +114,7 @@ const TransactionOut = () => {
             {transactions.map(t => (
               <tr key={t.header.trx_out_pk}>
                 <td>{t.header.trx_out_no}</td>
-                <td>{t.header.trx_out_date}</td>
+                <td>{new Date(t.header.trx_out_date).toLocaleDateString('id-ID')}</td>
                 <td>{t.warehouse_name}</td>
                 <td>{t.customer_name}</td>
                 <td>{t.header.trx_out_notes}</td>

@@ -140,7 +140,7 @@ const TransactionIn = () => {
             {transactions.map(t => (
               <tr key={t.header.trx_in_pk}>
                 <td>{t.header.trx_in_no}</td>
-                <td>{t.header.trx_in_date}</td>
+                <td>{new Date(t.header.trx_in_date).toLocaleDateString('id-ID')}</td>
                 <td>{t.warehouse_name}</td>
                 <td>{t.supplier_name}</td>
                 <td>{t.header.trx_in_notes}</td>
