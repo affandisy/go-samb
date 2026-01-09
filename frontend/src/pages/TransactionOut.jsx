@@ -36,10 +36,15 @@ const TransactionOut = () => {
 
   const handleDetailChange = (index, field, value) => {
     const newDetails = [...formData.details];
-    let val = parseInt(value);
-    if(val < 0) val = 0; 
-
-    newDetails[index][field] = val;
+    
+    if (field === 'trx_out_d_product_idf') {
+      newDetails[index][field] = parseInt(value) || '';
+    } else {
+      let val = parseInt(value) || 0;
+      if (val < 0) val = 0;
+      newDetails[index][field] = val;
+    }
+    
     setFormData({ ...formData, details: newDetails });
   };
 
@@ -48,6 +53,23 @@ const TransactionOut = () => {
     setErrorMsg('');
     setSuccessMsg('');
 
+    // Validasi details
+    if (formData.details.length === 0) {
+      setErrorMsg('Tambahkan minimal 1 item produk!');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Validasi setiap detail item
+    for (let i = 0; i < formData.details.length; i++) {
+      const detail = formData.details[i];
+      if (!detail.trx_out_d_product_idf) {
+        setErrorMsg(`Item ${i + 1}: Pilih produk terlebih dahulu!`);
+        window.scrollTo(0, 0);
+        return;
+      }
+    }
+
     try {
       const payload = {
         ...formData,
@@ -55,13 +77,16 @@ const TransactionOut = () => {
         trx_out_cust_idf: parseInt(formData.trx_out_cust_idf),
       };
       await api.post('/trx-out', payload);
-      alert('Transaksi berhasil!');
-      setShowForm(false); fetchTransactions();
+      setSuccessMsg('Transaksi berhasil!');
+      setTimeout(() => {
+        setShowForm(false);
+        fetchTransactions();
+      }, 1000);
     } catch (err) { 
-    const message = err.response?.data?.error || "Terjadi kesalahan pada server";
+      const message = err.response?.data?.error || "Terjadi kesalahan pada server";
       setErrorMsg(message);
       window.scrollTo(0, 0);
-     }
+    }
   };
 
   return (
@@ -75,6 +100,8 @@ const TransactionOut = () => {
 
       {showForm ? (
         <Card className="p-4">
+          {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+          {successMsg && <div className="alert alert-success">{successMsg}</div>}
           <Form onSubmit={handleSubmit}>
             <Row className="mb-3">
               <Col><Form.Control placeholder="No Trx" required onChange={e => setFormData({...formData, trx_out_no: e.target.value})} /></Col>

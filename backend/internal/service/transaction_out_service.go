@@ -43,23 +43,46 @@ func (s *transactionOutService) Create(ctx context.Context, trx *model.Transacti
 		return 0, errors.New("need one detail")
 	}
 
-	for _, detail := range trx.Details {
+	productIDs := make(map[int]bool)
+	productQtyMap := make(map[int]struct {
+		dus int
+		pcs int
+	})
 
+	for _, detail := range trx.Details {
 		if detail.TrxOutDQtyDus < 0 || detail.TrxOutDQtyPcs < 0 {
 			return 0, errors.New("the quantity of goods out cannot be negative")
 		}
 
-		currentDus, currentPcs, err := s.stockRepo.GetCurrentStock(ctx, trx.Header.WhsIdf, detail.TrxOutDProductIdf)
-		if err != nil {
-			return 0, errors.New("failed to check product stock ID")
+		productIDs[detail.TrxOutDProductIdf] = true
+		productQtyMap[detail.TrxOutDProductIdf] = struct {
+			dus int
+			pcs int
+		}{
+			dus: detail.TrxOutDQtyDus,
+			pcs: detail.TrxOutDQtyPcs,
+		}
+	}
+
+	stockMap, err := s.stockRepo.GetCurrentStockBatch(ctx, trx.Header.WhsIdf, getKeys(productIDs))
+	if err != nil {
+		return 0, fmt.Errorf("failed to check stock: %v", err)
+	}
+
+	for productID, requestedQty := range productQtyMap {
+		currentStock, exists := stockMap[productID]
+		if !exists {
+			return 0, fmt.Errorf("product ID %d not found in stock", productID)
 		}
 
-		if currentDus < detail.TrxOutDQtyDus {
-			return 0, fmt.Errorf("Insufficient Box stock for product ID %d. Available: %d, Requested: %d", detail.TrxOutDProductIdf, currentDus, detail.TrxOutDQtyDus)
+		if currentStock.Dus < requestedQty.dus {
+			return 0, fmt.Errorf("insufficient Box stock for product ID %d. Available: %d, Requested: %d",
+				productID, currentStock.Dus, requestedQty.dus)
 		}
 
-		if currentPcs < detail.TrxOutDQtyPcs {
-			return 0, fmt.Errorf("Insufficient stock of Pcs for product ID %d. Available: %d, Requested: %d", detail.TrxOutDProductIdf, currentPcs, detail.TrxOutDQtyPcs)
+		if currentStock.Pcs < requestedQty.pcs {
+			return 0, fmt.Errorf("insufficient stock of Pcs for product ID %d. Available: %d, Requested: %d",
+				productID, currentStock.Pcs, requestedQty.pcs)
 		}
 	}
 
@@ -72,4 +95,12 @@ func (s *transactionOutService) GetList(ctx context.Context) ([]model.Transactio
 
 func (s *transactionOutService) GetDetail(ctx context.Context, id int) (*model.TransactionOutHeader, []model.TransactionOutDetailView, error) {
 	return s.trxOutRepo.GetDetail(ctx, id)
+}
+
+func getKeys(m map[int]bool) []int {
+	keys := make([]int, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
