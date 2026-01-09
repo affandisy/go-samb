@@ -60,10 +60,10 @@ go run cmd/main.go
 ### 3. Setup Frontend
 cd frontend
 
-# Install dependencies
+#### Install dependencies
 npm install
 
-# Jalankan Frontend
+#### Jalankan Frontend
 npm run dev
 
 ## API Reference (cURL Testing)
@@ -129,3 +129,7 @@ curl -X POST http://localhost:8080/api/trx-out \
 ```bash
 curl -X GET http://localhost:8080/api/stock-report
 ```
+
+### Postman Test
+
+[![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)](https://documenter.getpostman.com/view/49261332/2sBXVfhqNF)
