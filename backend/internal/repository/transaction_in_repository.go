@@ -25,7 +25,7 @@ func NewTransactionInRepository(db *sql.DB) *transactionRepository {
 func (r *transactionRepository) Create(ctx context.Context, trx *model.TransactionIn) (int, error) {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 	defer tx.Rollback()
 
